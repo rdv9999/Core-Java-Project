@@ -1,0 +1,179 @@
+package CoreJavaProject;
+
+import java.util.Scanner;
+
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
+
+
+public class BankingProject {
+
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        List<BankAccount> accounts = new ArrayList<>();
+
+        int type;
+        int amount = 0;
+
+        do {
+            System.out.println("1. Withdraw");
+            System.out.println("2. Deposit");
+            System.out.println("3. Check Balance");
+            System.out.println("4. Delete Account");
+            System.out.println("5. Add Account");
+            System.out.println("6. Exit");
+            System.out.println("Enter your choice:");
+
+            type = sc.nextInt();
+
+            switch (type) {
+                case 1:
+                case 2:
+                    if (!accounts.isEmpty()) {
+                        System.out.println("Enter account number:");
+                        int accountNumber = sc.nextInt();
+                        BankAccount selectedAccount = findAccount(accounts, accountNumber);
+                        if (selectedAccount != null) {
+                            System.out.println("Enter amount:");
+                            amount = sc.nextInt();
+                            selectedAccount.transactions(type, amount, sc);
+                        } else {
+                            System.out.println("Account not found.\n");
+                        }
+                    } else {
+                        System.out.println("No accounts exist.\n");
+                    }
+                    break;
+                case 3:
+                    if (!accounts.isEmpty()) {
+                        System.out.println("Enter account number:");
+                        int accountNumber = sc.nextInt();
+                        BankAccount selectedAccount = findAccount(accounts, accountNumber);
+                        if (selectedAccount != null) {
+                            selectedAccount.show();
+                        } else {
+                            System.out.println("Account not found.\n");
+                        }
+                    } else {
+                        System.out.println("No accounts exist.\n");
+                    }
+                    break;
+                case 4:
+                    if (!accounts.isEmpty()) {
+                        System.out.println("Enter account number:");
+                        int accountNumber = sc.nextInt();
+                        BankAccount selectedAccount = findAccount(accounts, accountNumber);
+                        if (selectedAccount != null) {
+                            selectedAccount.deleteAccount();
+                            accounts.remove(selectedAccount);
+                        } else {
+                            System.out.println("Account not found.\n");
+                        }
+                    } else {
+                        System.out.println("No accounts exist.\n");
+                    }
+                    break;
+                case 5:
+                    System.out.println("Enter Account Details");
+
+                    //enter yourself
+//                    System.out.println("Enter Account number:");
+//                    int actno = sc.nextInt();
+                    
+                    //generate auto
+                    Random random = new Random();
+                    int actno = 1000000000 + random.nextInt(900000000);
+                    System.out.println("Generated Account Number: " + actno);
+                    
+                    
+                    System.out.println("Enter Name:");
+                    String name = sc.next();
+                    System.out.println("Enter initial balance:");
+                    int balance = sc.nextInt();
+                    accounts.add(new BankAccount(actno, name, balance, 0));
+                    System.out.println("Account added successfully.\n");
+                    break;
+                case 6:
+                    System.out.println("Exiting.........");
+                    break;
+                default:
+                    System.out.println("Invalid choice.");
+            }
+        } while (type != 6);
+    }
+
+    private static BankAccount findAccount(List<BankAccount> accounts, int accountNumber) {
+        for (BankAccount account : accounts) {
+            if (account.getActno() == accountNumber) {
+                return account;
+            }
+        }
+        return null;
+    }
+}
+
+class BankAccount {
+    private int amount;
+    private int actno;
+    private String name;
+    private int balance;
+
+    public BankAccount(int actno, String name, int balance, int amount) {
+        this.actno = actno;
+        this.name = name;
+        this.balance = balance;
+        this.amount = amount;
+    }
+
+    public void transactions(int type, int amount, Scanner sc) {
+        switch (type) {
+            case 1:
+                try {
+                    System.out.println("Available Balance: Rs." + balance);
+                    if (amount > balance) {
+                        throw new InsufficientBalance();
+                    }
+                    balance -= amount;
+                    System.out.println("Withdrawal successful.\nNew balance: Rs." + balance);
+
+                } catch (InsufficientBalance e) {
+                    System.out.println("Insufficient balance");
+                }
+                break;
+            case 2:
+                System.out.println("Available Balance: Rs. " + balance);
+                if (amount > 0) {
+                    balance += amount;
+                    System.out.println("Deposit successful.\nNew balance: Rs." + balance);
+                } else {
+                    System.out.println("Invalid amount for deposit.");
+                }
+                break;
+            case 3:
+                System.out.println("Your current balance: Rs." + balance);
+                break;
+        }
+    }
+
+    public void show() {
+        System.out.println("Account Number: " + actno);
+        System.out.println("Name: " + name);
+        System.out.println("Balance: Rs." + balance);
+    }
+
+    public void deleteAccount() {
+        actno = 0;
+        name = "";
+        balance = 0;
+        System.out.println("Account deleted successfully.\n");
+    }
+
+    public int getActno() {
+        return actno;
+    }
+
+    class InsufficientBalance extends Exception {
+    }
+}
